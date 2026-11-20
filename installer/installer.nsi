@@ -6,19 +6,19 @@ SetCompressor /SOLID lzma
 
 !define APP_NAME "一叶便签"
 !define APP_EXE "YiyeNote.exe"
-!define APP_VERSION "0.1.0"
+!define APP_VERSION "0.1.1"
 !define APP_PUBLISHER "YiyeNote"
 !define APP_SRC "..\build\compose\binaries\main\app\YiyeNote"
 !define ICON "..\icons\app.ico"
 !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\YiyeNote"
 
 Name "${APP_NAME}"
-OutFile "..\build\installer\YiyeNote-0.1.0-setup.exe"
+OutFile "..\build\installer\YiyeNote-0.1.1-setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\YiyeNote"
 InstallDirRegKey HKCU "Software\YiyeNote" "InstallDir"
 RequestExecutionLevel user
 
-VIProductVersion "0.1.0.0"
+VIProductVersion "0.1.1.0"
 VIAddVersionKey "ProductName" "${APP_NAME}"
 VIAddVersionKey "FileDescription" "${APP_NAME} 安装程序"
 VIAddVersionKey "FileVersion" "${APP_VERSION}"
