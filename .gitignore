@@ -1,0 +1,28 @@
+# Gradle
+.gradle/
+build/
+.kotlin/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# 本机配置
+local.properties
+
+# 日志与临时文件
+*.log
+*.hprof
+*.tmp
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# 发布产物（安装包、便携包）
+release/
+
+# 开发者文档，仅本地保留
+/docs/DEVELOPMENT.md
