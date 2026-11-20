@@ -57,6 +57,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
@@ -718,7 +719,10 @@ private fun EditBody(
     onEditingChange: (Boolean) -> Unit
 ) {
     val titleFocus = remember(note.id) { FocusRequester() }
-    var tagDraft by remember(note.id) { mutableStateOf(note.tags.joinToString(" ")) }
+    // 用 TextFieldValue 自己持有文本、光标与输入法组词状态，避免把输入法拼音当成正文回写后破坏组词
+    var titleValue by remember(note.id) { mutableStateOf(TextFieldValue(note.title)) }
+    var textValue by remember(note.id) { mutableStateOf(TextFieldValue(note.text)) }
+    var tagValue by remember(note.id) { mutableStateOf(TextFieldValue(note.tags.joinToString(" "))) }
 
     LaunchedEffect(note.id) { titleFocus.requestFocus() }
 
@@ -737,8 +741,11 @@ private fun EditBody(
             .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
         BasicTextField(
-            value = note.title,
-            onValueChange = { controller.updateTitle(note.id, it) },
+            value = titleValue,
+            onValueChange = { value ->
+                titleValue = value
+                controller.updateTitle(note.id, value.text)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(titleFocus),
@@ -747,7 +754,7 @@ private fun EditBody(
             singleLine = true,
             decorationBox = { inner ->
                 Box {
-                    if (note.title.isEmpty()) {
+                    if (titleValue.text.isEmpty()) {
                         Text("标题（留空取首行）", color = Color(0x552E2A24), fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                     }
                     inner()
@@ -756,14 +763,17 @@ private fun EditBody(
         )
         Spacer(Modifier.height(6.dp))
         BasicTextField(
-            value = note.text,
-            onValueChange = { controller.updateText(note.id, it) },
+            value = textValue,
+            onValueChange = { value ->
+                textValue = value
+                controller.updateText(note.id, value.text)
+            },
             modifier = Modifier.fillMaxWidth(),
             textStyle = TextStyle(color = Ink, fontSize = 13.sp, lineHeight = 20.sp),
             cursorBrush = SolidColor(Ink),
             decorationBox = { inner ->
                 Box {
-                    if (note.text.isEmpty()) {
+                    if (textValue.text.isEmpty()) {
                         Text("写点什么…（- [ ] 或 -（）开头即待办）", color = InkMuted, fontSize = 11.sp)
                     }
                     inner()
@@ -772,10 +782,10 @@ private fun EditBody(
         )
         Spacer(Modifier.height(10.dp))
         BasicTextField(
-            value = tagDraft,
-            onValueChange = { raw ->
-                tagDraft = raw
-                controller.updateTags(note.id, parseTags(raw))
+            value = tagValue,
+            onValueChange = { value ->
+                tagValue = value
+                controller.updateTags(note.id, parseTags(value.text))
             },
             modifier = Modifier.fillMaxWidth(),
             textStyle = TextStyle(color = InkMuted, fontSize = 11.sp),
@@ -783,7 +793,7 @@ private fun EditBody(
             singleLine = true,
             decorationBox = { inner ->
                 Box {
-                    if (tagDraft.isEmpty()) {
+                    if (tagValue.text.isEmpty()) {
                         Text("标签（空格或逗号分隔）", color = Color(0x552E2A24), fontSize = 11.sp)
                     }
                     inner()
