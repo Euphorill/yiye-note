@@ -49,6 +49,9 @@ Section "必选 - 程序文件" SEC_APP
   SetShellVarContext current
   nsExec::ExecToLog 'taskkill /F /IM ${APP_EXE}'
   SetOutPath "$INSTDIR"
+  ; 覆盖安装时清掉旧版本的 app/runtime，避免残留旧 jar 与新版本混在一起
+  RMDir /r "$INSTDIR\app"
+  RMDir /r "$INSTDIR\runtime"
   File /r "${APP_SRC}\*.*"
   WriteUninstaller "$INSTDIR\uninstall.exe"
 
