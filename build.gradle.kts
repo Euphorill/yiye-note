@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.desknote"
-version = "0.1.1"
+version = "0.1.2"
 
 repositories {
     maven("https://maven.aliyun.com/repository/public")
@@ -36,7 +36,7 @@ compose.desktop {
             // 局域网接口使用 com.sun.net.httpserver，需显式打进精简运行时
             modules("jdk.httpserver")
             packageName = "YiyeNote"
-            packageVersion = "0.1.1"
+            packageVersion = "0.1.2"
             description = "YiyeNote - desktop sticky notes"
             vendor = "YiyeNote"
             windows {
