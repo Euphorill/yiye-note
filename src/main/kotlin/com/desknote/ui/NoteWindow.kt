@@ -498,6 +498,7 @@ private fun MenuButton(
     onEditingChange: (Boolean) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    DismissOnOutsideClick(expanded) { expanded = false }
     val index = controller.notes.indexOfFirst { it.id == note.id } + 1
     Box {
         Box(

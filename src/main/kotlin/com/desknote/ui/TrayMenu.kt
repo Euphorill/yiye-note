@@ -93,6 +93,7 @@ fun TrayMenuWindow(controller: AppController, onExit: () -> Unit) {
             window.toFront()
             window.requestFocus()
         }
+        DismissOnOutsideClick(true) { controller.closeTrayMenu() }
 
         Column(
             Modifier

@@ -18,6 +18,9 @@ import java.util.concurrent.Executors
  * POST   /notes                 新建便签，body: {"text":"...","title":"..."}
  * POST   /notes/{id}/append     追加一行，body: {"text":"..."}
  * POST   /notes/{id}/toggle-task 切换待办勾选，body: {"line":0}
+ * POST   /notes/{id}/line/{n}    改写第 n 行，body: {"text":"..."}
+ * DELETE /notes/{id}/line/{n}    删除第 n 行
+ * POST   /notes/{id}/title       修改标题，body: {"title":"..."}（空字符串即清空）
  * DELETE /notes/{id}            删除便签
  */
 class LocalApi(
@@ -30,6 +33,9 @@ class LocalApi(
         fun createNote(text: String, title: String): String?
         fun appendLine(id: String, text: String): Boolean
         fun toggleTask(id: String, line: Int): Boolean
+        fun setLine(id: String, line: Int, text: String): Boolean
+        fun deleteLine(id: String, line: Int): Boolean
+        fun setTitle(id: String, title: String): Boolean
         fun deleteNote(id: String): Boolean
     }
 
@@ -119,6 +125,49 @@ class LocalApi(
                                 respond(exchange, 200, mapOf("ok" to true))
                             } else {
                                 respond(exchange, 404, mapOf("error" to "not found 或该行不是待办"))
+                            }
+                        }
+
+                        action == "title" && method == "POST" -> {
+                            val title = readBody(exchange)?.get("title")?.takeIf { !it.isJsonNull }?.asString
+                            if (title == null) {
+                                respond(exchange, 400, mapOf("error" to "缺少 title（清空可传空字符串）"))
+                            } else if (handlers.setTitle(id, title)) {
+                                respond(exchange, 200, mapOf("ok" to true))
+                            } else {
+                                respond(exchange, 404, mapOf("error" to "not found"))
+                            }
+                        }
+
+                        action.startsWith("line/") -> {
+                            val line = action.removePrefix("line/").toIntOrNull()
+                            when {
+                                line == null || line < 0 ->
+                                    respond(exchange, 400, mapOf("error" to "行号必须是非负整数"))
+
+                                method == "POST" -> {
+                                    val text = readBody(exchange)?.get("text")?.takeIf { !it.isJsonNull }?.asString
+                                    when {
+                                        text == null ->
+                                            respond(exchange, 400, mapOf("error" to "text 不能为空"))
+                                        text.contains('\n') || text.contains('\r') ->
+                                            respond(exchange, 400, mapOf("error" to "text 只能包含单行内容"))
+                                        handlers.setLine(id, line, text) ->
+                                            respond(exchange, 200, mapOf("ok" to true))
+                                        else ->
+                                            respond(exchange, 404, mapOf("error" to "not found 或行号越界"))
+                                    }
+                                }
+
+                                method == "DELETE" -> {
+                                    if (handlers.deleteLine(id, line)) {
+                                        respond(exchange, 200, mapOf("ok" to true))
+                                    } else {
+                                        respond(exchange, 404, mapOf("error" to "not found 或行号越界"))
+                                    }
+                                }
+
+                                else -> respond(exchange, 404, mapOf("error" to "not found"))
                             }
                         }
 

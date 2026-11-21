@@ -92,6 +92,53 @@ class AppController(private val store: Store = Store()) {
             }
         }
 
+        override fun setLine(id: String, line: Int, text: String): Boolean = onEdt {
+            val index = notes.indexOfFirst { it.id == id }
+            if (index < 0) {
+                false
+            } else {
+                val note = notes[index]
+                val lines = note.text.split('\n')
+                if (line !in lines.indices) {
+                    false
+                } else {
+                    val updated = lines.toMutableList().apply { this[line] = text }.joinToString("\n")
+                    notes[index] = note.copy(text = updated, updatedAt = System.currentTimeMillis())
+                    saveSoon()
+                    true
+                }
+            }
+        }
+
+        override fun deleteLine(id: String, line: Int): Boolean = onEdt {
+            val index = notes.indexOfFirst { it.id == id }
+            if (index < 0) {
+                false
+            } else {
+                val note = notes[index]
+                val lines = note.text.split('\n')
+                if (line !in lines.indices) {
+                    false
+                } else {
+                    val updated = lines.toMutableList().apply { removeAt(line) }.joinToString("\n")
+                    notes[index] = note.copy(text = updated, updatedAt = System.currentTimeMillis())
+                    saveSoon()
+                    true
+                }
+            }
+        }
+
+        override fun setTitle(id: String, title: String): Boolean = onEdt {
+            val index = notes.indexOfFirst { it.id == id }
+            if (index < 0) {
+                false
+            } else {
+                notes[index] = notes[index].copy(title = title, updatedAt = System.currentTimeMillis())
+                saveSoon()
+                true
+            }
+        }
+
         override fun deleteNote(id: String): Boolean = onEdt {
             val existed = notes.any { it.id == id }
             if (existed) delete(id)
